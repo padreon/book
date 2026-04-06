@@ -1,0 +1,286 @@
+@import "tailwindcss";
+
+/* ── Design System: Editorial Refined ── */
+
+:root {
+  --navy: #1a2744;
+  --navy-light: #243454;
+  --navy-dark: #111b30;
+  --warm-white: #fafaf8;
+  --cream: #f5f3ee;
+  --gold: #c9a84c;
+  --gold-light: #d4ba6a;
+  --gold-dark: #a8893a;
+  --text-primary: #1a2744;
+  --text-secondary: #4a5568;
+  --text-muted: #8896a6;
+  --border: #e2ddd5;
+  --border-light: #efeae3;
+  --error: #c53030;
+  --success: #2f855a;
+}
+
+@theme inline {
+  --color-navy: var(--navy);
+  --color-navy-light: var(--navy-light);
+  --color-navy-dark: var(--navy-dark);
+  --color-warm-white: var(--warm-white);
+  --color-cream: var(--cream);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-gold-dark: var(--gold-dark);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-error: var(--error);
+  --color-success: var(--success);
+  --font-heading: var(--font-playfair);
+  --font-body: var(--font-source-serif);
+}
+
+/* ── Base Styles ── */
+
+body {
+  background: var(--warm-white);
+  color: var(--text-primary);
+  font-family: var(--font-source-serif), Georgia, serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-playfair), 'Playfair Display', serif;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--navy);
+}
+
+/* ── Gold Divider ── */
+
+.divider-gold {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+/* ── Editorial Card ── */
+
+.card {
+  background: white;
+  border: 1px solid var(--border-light);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(26, 39, 68, 0.08);
+}
+
+/* ── Button Styles ── */
+
+.btn-primary {
+  background: var(--navy);
+  color: white;
+  padding: 0.75rem 1.75rem;
+  font-family: var(--font-source-serif), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  transition: background 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: var(--navy-light);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--navy);
+  padding: 0.75rem 1.75rem;
+  font-family: var(--font-source-serif), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  border: 1.5px solid var(--navy);
+  transition: background 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: var(--navy);
+  color: white;
+}
+
+.btn-gold {
+  background: var(--gold);
+  color: var(--navy-dark);
+  padding: 0.75rem 1.75rem;
+  font-family: var(--font-source-serif), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  transition: background 0.2s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-gold:hover {
+  background: var(--gold-light);
+}
+
+.btn-danger {
+  background: var(--error);
+  color: white;
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-danger:hover {
+  opacity: 0.9;
+}
+
+/* ── Form Inputs ── */
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border);
+  background: white;
+  color: var(--text-primary);
+  font-family: var(--font-source-serif), Georgia, serif;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border);
+  background: white;
+  color: var(--text-primary);
+  font-family: var(--font-source-serif), Georgia, serif;
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
+}
+
+/* ── Entrance Animation ── */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.6s ease forwards;
+}
+
+.animate-fade-up-delay {
+  animation: fadeUp 0.6s ease 0.15s forwards;
+  opacity: 0;
+}
+
+.animate-fade-up-delay-2 {
+  animation: fadeUp 0.6s ease 0.3s forwards;
+  opacity: 0;
+}
+
+/* ── TipTap Content Rendering ── */
+
+.prose-content h1 { font-size: 2rem; margin: 2rem 0 1rem; }
+.prose-content h2 { font-size: 1.5rem; margin: 1.75rem 0 0.75rem; }
+.prose-content h3 { font-size: 1.25rem; margin: 1.5rem 0 0.5rem; }
+.prose-content p { margin: 0.75rem 0; line-height: 1.8; color: var(--text-secondary); }
+.prose-content a { color: var(--gold-dark); text-decoration: underline; }
+.prose-content a:hover { color: var(--gold); }
+.prose-content img { max-width: 100%; height: auto; margin: 1.5rem 0; }
+.prose-content ul, .prose-content ol { margin: 0.75rem 0; padding-left: 1.5rem; }
+.prose-content li { margin: 0.25rem 0; line-height: 1.7; color: var(--text-secondary); }
+.prose-content blockquote {
+  border-left: 3px solid var(--gold);
+  padding: 0.75rem 1.25rem;
+  margin: 1.25rem 0;
+  background: var(--cream);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* ── Admin Sidebar ── */
+
+.admin-sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  transition: color 0.2s ease, background 0.2s ease;
+  text-decoration: none;
+}
+
+.admin-sidebar-link:hover,
+.admin-sidebar-link.active {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Table ── */
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--border);
+  font-family: var(--font-source-serif), Georgia, serif;
+}
+
+.admin-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.admin-table tr:hover td {
+  background: var(--cream);
+}
