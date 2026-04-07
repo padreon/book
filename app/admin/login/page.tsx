@@ -1,14 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { login, verify2FA } from "@/app/actions/auth";
+import { useState, useEffect } from "react";
+import { login, verify2FA, hasAnyAdmin } from "@/app/actions/auth";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+    const router = useRouter();
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [checking, setChecking] = useState(true);
     const [requires2FA, setRequires2FA] = useState(false);
     const [userId, setUserId] = useState("");
     const [totpCode, setTotpCode] = useState("");
+
+    useEffect(() => {
+        hasAnyAdmin().then((exists) => {
+            if (!exists) {
+                router.replace("/admin/setup");
+            } else {
+                setChecking(false);
+            }
+        });
+    }, [router]);
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -40,6 +53,14 @@ export default function LoginPage() {
             setLoading(false);
         }
     };
+
+    if (checking) {
+        return (
+            <div className="min-h-screen bg-navy flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-navy flex items-center justify-center px-6">

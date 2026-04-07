@@ -131,3 +131,27 @@ CREATE TRIGGER books_updated_at
 CREATE TRIGGER pages_updated_at
   BEFORE UPDATE ON pages
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ── Auto-create profile on user registration ──
+-- First user becomes master_admin, subsequent users become admin
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+DECLARE
+  user_count INT;
+  user_role TEXT;
+BEGIN
+  SELECT COUNT(*) INTO user_count FROM public.profiles;
+  IF user_count = 0 THEN
+    user_role := 'master_admin';
+  ELSE
+    user_role := 'admin';
+  END IF;
+  INSERT INTO public.profiles (id, email, role)
+  VALUES (NEW.id, NEW.email, user_role);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();

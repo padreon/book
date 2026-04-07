@@ -4,6 +4,64 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+export async function hasAnyAdmin() {
+    const supabase = await createClient();
+    const { count } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true });
+    return (count ?? 0) > 0;
+}
+
+export async function setupMasterAdmin(formData: FormData) {
+    const serviceClient = await createServiceClient();
+
+    // Check if there are already admins
+    const { count } = await serviceClient
+        .from("profiles")
+        .select("*", { count: "exact", head: true });
+
+    if ((count ?? 0) > 0) {
+        return { error: "Setup sudah selesai. Silakan login." };
+    }
+
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    if (!email || !password) {
+        return { error: "Email dan password wajib diisi." };
+    }
+
+    if (password.length < 6) {
+        return { error: "Password minimal 6 karakter." };
+    }
+
+    // Create user via service role (trigger will auto-assign master_admin)
+    const { data: newUser, error: createError } =
+        await serviceClient.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+        });
+
+    if (createError || !newUser.user) {
+        return { error: createError?.message || "Gagal membuat akun." };
+    }
+
+    // Now sign in as the new user
+    const supabase = await createClient();
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+    });
+
+    if (signInError) {
+        return { error: "Akun dibuat, tapi gagal login otomatis. Silakan login manual." };
+    }
+
+    revalidatePath("/admin", "layout");
+    redirect("/admin/dashboard");
+}
+
 export async function login(formData: FormData) {
     const supabase = await createClient();
 
