@@ -5,8 +5,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 export async function hasAnyAdmin() {
-    const supabase = await createClient();
-    const { count } = await supabase
+    const serviceClient = await createServiceClient();
+    const { count } = await serviceClient
         .from("profiles")
         .select("*", { count: "exact", head: true });
     return (count ?? 0) > 0;
