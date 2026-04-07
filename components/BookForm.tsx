@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import imageCompression from "browser-image-compression";
 import { createClient } from "@/lib/supabase/client";
 
 function slugify(text: string): string {
@@ -10,6 +11,22 @@ function slugify(text: string): string {
         .replace(/\s+/g, "-")
         .replace(/-+/g, "-")
         .trim();
+}
+
+const COMPRESS_OPTIONS = {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1920,
+    useWebWorker: true,
+};
+
+async function compressImage(file: File): Promise<File> {
+    // Skip compression for small files (< 1MB) or non-image types
+    if (file.size <= 1 * 1024 * 1024) return file;
+    const compressed = await imageCompression(file, COMPRESS_OPTIONS);
+    console.log(
+        `Compressed ${file.name}: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(compressed.size / 1024 / 1024).toFixed(1)}MB`
+    );
+    return compressed;
 }
 
 type BookFormProps = {
@@ -68,7 +85,8 @@ export function BookForm({ action, initialData }: BookFormProps) {
         if (!file) return;
 
         setUploading(true);
-        const url = await uploadFile(file);
+        const compressed = await compressImage(file);
+        const url = await uploadFile(compressed);
         if (url) setCoverUrl(url);
         setUploading(false);
     };
@@ -82,7 +100,8 @@ export function BookForm({ action, initialData }: BookFormProps) {
         setUploading(true);
         const newUrls: string[] = [];
         for (const file of Array.from(files)) {
-            const url = await uploadFile(file);
+            const compressed = await compressImage(file);
+            const url = await uploadFile(compressed);
             if (url) newUrls.push(url);
         }
         setImages((prev) => [...prev, ...newUrls]);
