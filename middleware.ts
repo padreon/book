@@ -30,17 +30,18 @@ export async function middleware(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser();
 
-    // Protect admin routes (except login)
+    // Protect admin routes (except login and setup)
     const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
     const isLoginPage = request.nextUrl.pathname === "/admin/login";
+    const isSetupPage = request.nextUrl.pathname === "/admin/setup";
 
-    if (isAdminRoute && !isLoginPage && !user) {
+    if (isAdminRoute && !isLoginPage && !isSetupPage && !user) {
         const loginUrl = new URL("/admin/login", request.url);
         return NextResponse.redirect(loginUrl);
     }
 
-    // Redirect logged-in users away from login page
-    if (isLoginPage && user) {
+    // Redirect logged-in users away from login/setup page
+    if ((isLoginPage || isSetupPage) && user) {
         const dashboardUrl = new URL("/admin/dashboard", request.url);
         return NextResponse.redirect(dashboardUrl);
     }
