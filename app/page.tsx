@@ -11,12 +11,15 @@ export default async function HomePage() {
   const { data: settingsData } = await supabase
     .from("site_settings")
     .select("key, value")
-    .in("key", ["tagline", "hero_description", "about_description"]);
+    .in("key", ["site_name", "tagline", "hero_description", "about_description"]);
 
   const settingsMap: Record<string, string> = {};
   settingsData?.forEach((s) => {
     settingsMap[s.key] = s.value;
   });
+
+  const siteName =
+    settingsMap["site_name"] || "Banua Publisher";
 
   const tagline =
     settingsMap["tagline"] ||
@@ -140,7 +143,7 @@ export default async function HomePage() {
             <span className="text-gold text-sm font-semibold tracking-widest uppercase">
               Tentang Kami
             </span>
-            <h2 className="text-3xl md:text-4xl mt-2 mb-6">Banua Publisher</h2>
+            <h2 className="text-3xl md:text-4xl mt-2 mb-6">{siteName}</h2>
             <p className="text-text-primary leading-relaxed text-lg">
               {aboutDescription}
             </p>
