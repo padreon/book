@@ -11,7 +11,7 @@ export default async function HomePage() {
   const { data: settingsData } = await supabase
     .from("site_settings")
     .select("key, value")
-    .in("key", ["site_name", "tagline", "hero_description", "about_description"]);
+    .in("key", ["publisher_name", "tagline", "hero_description", "about_description"]);
 
   const settingsMap: Record<string, string> = {};
   settingsData?.forEach((s) => {
@@ -19,7 +19,7 @@ export default async function HomePage() {
   });
 
   const siteName =
-    settingsMap["site_name"] || "Banua Publisher";
+    settingsMap["publisher_name"] || "Banua Publisher";
 
   const tagline =
     settingsMap["tagline"] ||
