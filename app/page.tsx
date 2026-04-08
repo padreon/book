@@ -18,7 +18,7 @@ export default async function HomePage() {
     settingsMap[s.key] = s.value;
   });
 
-  const siteName =
+  const publisherName =
     settingsMap["publisher_name"] || "Banua Publisher";
 
   const tagline =
@@ -51,7 +51,7 @@ export default async function HomePage() {
           <div className="max-w-2xl">
             <div className="animate-fade-up">
               <span className="inline-block text-gold text-sm font-semibold tracking-widest uppercase mb-6">
-                Penerbit Buku Indonesia
+                {publisherName}
               </span>
             </div>
             <h1 className="animate-fade-up-delay text-4xl md:text-5xl lg:text-6xl text-white leading-tight mb-6">
@@ -143,7 +143,7 @@ export default async function HomePage() {
             <span className="text-gold text-sm font-semibold tracking-widest uppercase">
               Tentang Kami
             </span>
-            <h2 className="text-3xl md:text-4xl mt-2 mb-6">{siteName}</h2>
+            <h2 className="text-3xl md:text-4xl mt-2 mb-6">{publisherName}</h2>
             <p className="text-text-primary leading-relaxed text-lg">
               {aboutDescription}
             </p>
