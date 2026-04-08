@@ -8,7 +8,23 @@ import Link from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import Youtube from "@tiptap/extension-youtube";
+import imageCompression from "browser-image-compression";
 import { uploadTiptapImage, deleteTiptapImage } from "@/app/actions/tiptap";
+
+const COMPRESS_OPTIONS = {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1920,
+    useWebWorker: true,
+};
+
+async function compressImage(file: File): Promise<File> {
+    if (file.size <= 1 * 1024 * 1024) return file;
+    const compressed = await imageCompression(file, COMPRESS_OPTIONS);
+    console.log(
+        `Compressed ${file.name}: ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(compressed.size / 1024 / 1024).toFixed(1)}MB`
+    );
+    return compressed;
+}
 
 type TiptapEditorProps = {
     content: string;
@@ -324,8 +340,9 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
 
         try {
             setIsUploading(true);
+            const compressed = await compressImage(file);
             const formData = new FormData();
-            formData.append("file", file);
+            formData.append("file", compressed);
             
             const res = await uploadTiptapImage(formData);
             if (res.error) {
