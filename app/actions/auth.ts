@@ -12,6 +12,32 @@ export async function hasAnyAdmin() {
     return (count ?? 0) > 0;
 }
 
+// Simple in-memory rate limit for brute-force protection
+const rateLimitMap = new Map<string, { attempts: number; lockUntil: number }>();
+
+function checkRateLimit(email: string) {
+    const data = rateLimitMap.get(email);
+    if (!data) return null;
+    if (Date.now() < data.lockUntil) {
+        return `Terlalu banyak percobaan gagal. Coba lagi dalam ${Math.ceil((data.lockUntil - Date.now()) / 1000 / 60)} menit.`;
+    }
+    return null;
+}
+
+function recordFailedLogin(email: string) {
+    const data = rateLimitMap.get(email) || { attempts: 0, lockUntil: 0 };
+    data.attempts += 1;
+    if (data.attempts >= 5) {
+        data.lockUntil = Date.now() + 15 * 60 * 1000; // 15 mins lock
+        data.attempts = 0;
+    }
+    rateLimitMap.set(email, data);
+}
+
+function resetLoginAttempts(email: string) {
+    rateLimitMap.delete(email);
+}
+
 export async function setupMasterAdmin(formData: FormData) {
     const serviceClient = await createServiceClient();
 
@@ -72,11 +98,19 @@ export async function login(formData: FormData) {
         return { error: "Email dan password wajib diisi." };
     }
 
+    const rateLimitError = checkRateLimit(email);
+    if (rateLimitError) {
+        return { error: rateLimitError };
+    }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
+        recordFailedLogin(email);
         return { error: "Email atau password salah." };
     }
+
+    resetLoginAttempts(email);
 
     // Check if user has a profile with admin/master_admin role
     const {
@@ -182,15 +216,6 @@ export async function createAdminAccount(formData: FormData) {
 
     if (createError || !newUser.user) {
         return { error: createError?.message || "Gagal membuat akun." };
-    }
-
-    // Create profile
-    const { error: profileError } = await serviceClient
-        .from("profiles")
-        .insert({ id: newUser.user.id, email, role: "admin" });
-
-    if (profileError) {
-        return { error: "Akun dibuat tapi gagal menyimpan profil." };
     }
 
     revalidatePath("/admin/accounts");

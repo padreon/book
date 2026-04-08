@@ -10,6 +10,7 @@ const navItems = [
     { href: "/admin/books", label: "Buku", icon: "📚" },
     { href: "/admin/pages", label: "Halaman", icon: "📄" },
     { href: "/admin/messages", label: "Pesan", icon: "✉️" },
+    { href: "/admin/profile", label: "Profil Saya", icon: "🔑" },
 ];
 
 const masterAdminItems = [

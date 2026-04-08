@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -11,6 +11,28 @@ function slugify(text: string): string {
         .replace(/\s+/g, "-")
         .replace(/-+/g, "-")
         .trim();
+}
+
+export async function uploadBookImage(formData: FormData) {
+    const serviceClient = await createServiceClient();
+    const file = formData.get("file") as File;
+
+    if (!file) return { error: "File tidak ditemukan." };
+
+    const filename = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
+    const { error } = await serviceClient.storage
+        .from("media")
+        .upload(filename, file);
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    const {
+        data: { publicUrl },
+    } = serviceClient.storage.from("media").getPublicUrl(filename);
+
+    return { url: publicUrl };
 }
 
 export async function createBook(formData: FormData) {

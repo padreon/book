@@ -9,6 +9,8 @@ const settingGroups = [
         fields: [
             { key: "publisher_name", label: "Nama Penerbit" },
             { key: "tagline", label: "Tagline" },
+            { key: "hero_description", label: "Deskripsi Hero Utama" },
+            { key: "about_description", label: "Deskripsi Tentang Kami" },
             { key: "meta_description", label: "Deskripsi Meta" },
             { key: "address", label: "Alamat" },
             { key: "email", label: "Email" },

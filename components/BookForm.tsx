@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import imageCompression from "browser-image-compression";
-import { createClient } from "@/lib/supabase/client";
+import { uploadBookImage } from "@/app/actions/books";
 
 function slugify(text: string): string {
     return text
@@ -62,22 +62,17 @@ export function BookForm({ action, initialData }: BookFormProps) {
     };
 
     const uploadFile = async (file: File): Promise<string | null> => {
-        const supabase = createClient();
-        const filename = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-        const { error } = await supabase.storage
-            .from("media")
-            .upload(filename, file);
+        const formData = new FormData();
+        formData.set("file", file);
+        const result = await uploadBookImage(formData);
 
-        if (error) {
-            console.error("Upload error:", error);
+        if (result?.error || !result?.url) {
+            console.error("Upload error:", result?.error);
+            setError(result?.error || "Gagal mengunggah gambar.");
             return null;
         }
 
-        const {
-            data: { publicUrl },
-        } = supabase.storage.from("media").getPublicUrl(filename);
-
-        return publicUrl;
+        return result.url;
     };
 
     const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -198,45 +193,63 @@ export function BookForm({ action, initialData }: BookFormProps) {
                 />
             </div>
 
+            {/* Cover Upload */}
             <div>
                 <label className="block text-sm font-semibold mb-2">
                     Gambar Sampul
                 </label>
-                {coverUrl && (
-                    <div className="mb-3">
+                {coverUrl ? (
+                    <div className="mb-3 relative inline-block group">
                         <img
                             src={coverUrl}
                             alt="Cover preview"
-                            className="w-32 h-auto border border-border-light"
+                            className="w-32 h-auto border border-border-light rounded"
                         />
+                        <button
+                            type="button"
+                            onClick={() => setCoverUrl("")}
+                            className="absolute -top-2 -right-2 bg-error text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            ×
+                        </button>
+                    </div>
+                ) : (
+                    <div className="border-2 border-dashed border-border-light rounded-md p-6 text-center hover:bg-black/5 transition-colors relative cursor-pointer">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            id="cover-upload"
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            onChange={handleCoverUpload}
+                            disabled={uploading}
+                        />
+                        <div className="flex flex-col items-center pointer-events-none">
+                            <span className="text-4xl mb-2">📸</span>
+                            <span className="text-sm font-medium">Klik atau Drag untuk unggah</span>
+                            <span className="text-xs text-text-muted mt-1">Maks 1MB (Otomatis kompresi)</span>
+                        </div>
                     </div>
                 )}
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleCoverUpload}
-                    disabled={uploading}
-                    className="text-sm"
-                />
             </div>
 
+            {/* Images Upload */}
             <div>
                 <label className="block text-sm font-semibold mb-2">
                     Gambar Tambahan
                 </label>
                 {images.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-3">
+                    <div className="flex flex-wrap gap-4 mb-4">
                         {images.map((url, i) => (
-                            <div key={i} className="relative">
+                            <div key={i} className="relative group">
                                 <img
                                     src={url}
                                     alt={`Image ${i + 1}`}
-                                    className="w-20 h-20 object-cover border border-border-light"
+                                    className="w-24 h-24 object-cover border border-border-light rounded"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => removeImage(i)}
-                                    className="absolute -top-2 -right-2 w-5 h-5 bg-error text-white text-xs flex items-center justify-center"
+                                    className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-error text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                     ×
                                 </button>
@@ -244,14 +257,21 @@ export function BookForm({ action, initialData }: BookFormProps) {
                         ))}
                     </div>
                 )}
-                <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImagesUpload}
-                    disabled={uploading}
-                    className="text-sm"
-                />
+                <div className="border-2 border-dashed border-border-light rounded-md p-6 text-center hover:bg-black/5 transition-colors relative cursor-pointer">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        id="images-upload"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        multiple
+                        onChange={handleImagesUpload}
+                        disabled={uploading}
+                    />
+                    <div className="flex flex-col items-center pointer-events-none">
+                        <span className="text-4xl mb-2">🖼️</span>
+                        <span className="text-sm font-medium">Klik atau Drag untuk tambah gambar</span>
+                    </div>
+                </div>
             </div>
 
             {uploading && (

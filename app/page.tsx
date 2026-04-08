@@ -7,16 +7,28 @@ export const revalidate = 60;
 export default async function HomePage() {
   const supabase = await createClient();
 
-  // Fetch tagline from settings
-  const { data: taglineSetting } = await supabase
+  // Fetch tagline, hero text, and about text from settings
+  const { data: settingsData } = await supabase
     .from("site_settings")
-    .select("value")
-    .eq("key", "tagline")
-    .single();
+    .select("key, value")
+    .in("key", ["tagline", "hero_description", "about_description"]);
+
+  const settingsMap: Record<string, string> = {};
+  settingsData?.forEach((s) => {
+    settingsMap[s.key] = s.value;
+  });
 
   const tagline =
-    taglineSetting?.value ||
+    settingsMap["tagline"] ||
     "Menerbitkan karya-karya berkualitas untuk pembaca nusantara";
+
+  const heroDescription =
+    settingsMap["hero_description"] ||
+    "Menemani perjalanan literasi bangsa dengan menerbitkan buku-buku bermutu tinggi dari penulis-penulis terbaik.";
+
+  const aboutDescription =
+    settingsMap["about_description"] ||
+    "Kami adalah penerbit yang berkomitmen menghadirkan karya-karya berkualitas dari penulis Indonesia. Dengan proses editorial yang ketat dan desain buku yang estetik, kami memastikan setiap buku yang terbit siap memikat pembaca.";
 
   // Fetch latest 4 books
   const { data: books } = await supabase
@@ -42,9 +54,8 @@ export default async function HomePage() {
             <h1 className="animate-fade-up-delay text-4xl md:text-5xl lg:text-6xl text-white leading-tight mb-6">
               {tagline}
             </h1>
-            <p className="animate-fade-up-delay-2 text-white/60 text-lg leading-relaxed mb-8 max-w-lg">
-              Menemani perjalanan literasi bangsa dengan menerbitkan buku-buku
-              bermutu tinggi dari penulis-penulis terbaik.
+            <p className="animate-fade-up-delay-2 text-white/90 text-lg leading-relaxed mb-8 max-w-lg">
+              {heroDescription}
             </p>
             <div className="animate-fade-up-delay-2">
               <Link href="/books" className="btn-gold inline-block">
@@ -130,11 +141,8 @@ export default async function HomePage() {
               Tentang Kami
             </span>
             <h2 className="text-3xl md:text-4xl mt-2 mb-6">Banua Publisher</h2>
-            <p className="text-text-secondary leading-relaxed text-lg">
-              Kami adalah penerbit yang berkomitmen menghadirkan karya-karya
-              berkualitas dari penulis Indonesia. Dengan proses editorial yang
-              ketat dan desain buku yang estetik, kami memastikan setiap buku
-              yang terbit siap memikat pembaca.
+            <p className="text-text-primary leading-relaxed text-lg">
+              {aboutDescription}
             </p>
             <div className="divider-gold w-24 mx-auto mt-8" />
           </div>
