@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { TiptapEditor } from "./TiptapEditor";
 
 function slugify(text: string): string {
     return text
@@ -85,15 +86,11 @@ export function PageForm({ action, initialData }: PageFormProps) {
             <div>
                 <label className="block text-sm font-semibold mb-2">Konten</label>
                 <p className="text-xs text-text-muted mb-2">
-                    Gunakan format HTML. Contoh: &lt;p&gt;Teks&lt;/p&gt;,
-                    &lt;h2&gt;Judul&lt;/h2&gt;
+                    Gunakan editor di bawah ini untuk memformat teks.
                 </p>
-                <textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    className="textarea font-mono text-sm"
-                    placeholder="<p>Konten halaman...</p>"
-                    rows={12}
+                <TiptapEditor
+                    content={content}
+                    onChange={(value) => setContent(value)}
                 />
             </div>
 
