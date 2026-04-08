@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { MarkReadButton } from "@/components/MarkReadButton";
+import { DeleteMessageButton } from "@/components/DeleteMessageButton";
 
 export const revalidate = 0;
 
@@ -49,9 +50,12 @@ export default async function AdminMessagesPage() {
                                         {msg.message}
                                     </p>
                                 </div>
-                                {!msg.is_read && (
-                                    <MarkReadButton id={msg.id} />
-                                )}
+                                <div className="flex flex-col gap-2 items-end">
+                                    {!msg.is_read && (
+                                        <MarkReadButton id={msg.id} />
+                                    )}
+                                    <DeleteMessageButton id={msg.id} />
+                                </div>
                             </div>
                         </div>
                     ))}

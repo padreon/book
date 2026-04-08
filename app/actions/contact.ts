@@ -72,3 +72,19 @@ export async function markMessageAsRead(id: string) {
     revalidatePath("/admin/messages");
     return { success: true };
 }
+
+export async function deleteMessage(id: string) {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+        .from("contact_messages")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        return { error: "Gagal menghapus pesan." };
+    }
+
+    revalidatePath("/admin/messages");
+    return { success: true };
+}
