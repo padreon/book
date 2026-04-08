@@ -132,8 +132,8 @@ export async function login(formData: FormData) {
         return { error: "Akun tidak memiliki akses admin." };
     }
 
-    // If master_admin with TOTP, require 2FA
-    if (profile.role === "master_admin" && profile.totp_secret) {
+    // If TOTP is enabled, require 2FA
+    if (profile.totp_secret) {
         return { requires2FA: true, userId: user.id };
     }
 
