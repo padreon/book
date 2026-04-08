@@ -39,7 +39,11 @@ export default async function AdminPagesPage() {
                                     <td className="font-semibold text-text-primary">
                                         {page.title}
                                     </td>
-                                    <td className="text-text-muted">/{page.slug}</td>
+                                    <td className="text-text-muted">
+                                        <Link href={`/${page.slug}`} target="_blank" className="hover:text-gold transition-colors">
+                                            /{page.slug}
+                                        </Link>
+                                    </td>
                                     <td>
                                         <TogglePublishButton
                                             id={page.id}

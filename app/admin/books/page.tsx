@@ -27,6 +27,7 @@ export default async function AdminBooksPage() {
                         <thead>
                             <tr>
                                 <th>Judul</th>
+                                <th>Slug</th>
                                 <th>Penulis</th>
                                 <th>Terbit</th>
                                 <th className="text-right">Aksi</th>
@@ -37,6 +38,11 @@ export default async function AdminBooksPage() {
                                 <tr key={book.id}>
                                     <td className="font-semibold text-text-primary">
                                         {book.title}
+                                    </td>
+                                    <td className="text-text-muted">
+                                        <Link href={`/books/${book.slug}`} target="_blank" className="hover:text-gold transition-colors">
+                                            /{book.slug}
+                                        </Link>
                                     </td>
                                     <td>{book.author}</td>
                                     <td>
