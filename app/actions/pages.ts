@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { deleteTiptapImage } from "@/app/actions/tiptap";
 
 function slugify(text: string): string {
     return text
@@ -75,10 +76,20 @@ export async function updatePage(id: string, formData: FormData) {
 export async function deletePage(id: string) {
     const supabase = await createClient();
 
+    const { data: page } = await supabase.from("pages").select("content").eq("id", id).single();
     const { error } = await supabase.from("pages").delete().eq("id", id);
 
     if (error) {
         return { error: "Gagal menghapus halaman." };
+    }
+
+    if (page?.content) {
+        const imgRegex = /<img[^>]+src="([^">]+)"/g;
+        let match;
+        while ((match = imgRegex.exec(page.content)) !== null) {
+            const url = match[1];
+            await deleteTiptapImage(url).catch(console.error);
+        }
     }
 
     revalidatePath("/admin/pages");

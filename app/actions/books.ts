@@ -3,6 +3,7 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { deleteTiptapImage } from "@/app/actions/tiptap";
 
 function slugify(text: string): string {
     return text
@@ -112,10 +113,22 @@ export async function updateBook(id: string, formData: FormData) {
 export async function deleteBook(id: string) {
     const supabase = await createClient();
 
+    const { data: book } = await supabase.from("books").select("cover_url, images").eq("id", id).single();
     const { error } = await supabase.from("books").delete().eq("id", id);
 
     if (error) {
         return { error: "Gagal menghapus buku." };
+    }
+
+    if (book) {
+        if (book.cover_url) {
+            await deleteTiptapImage(book.cover_url).catch(console.error);
+        }
+        if (book.images && Array.isArray(book.images)) {
+            for (const imgUrl of book.images) {
+                await deleteTiptapImage(imgUrl).catch(console.error);
+            }
+        }
     }
 
     revalidatePath("/books");
