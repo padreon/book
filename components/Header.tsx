@@ -10,7 +10,13 @@ const navLinks = [
     { href: "/contact", label: "Kontak" },
 ];
 
-export function Header() {
+export function Header({
+    siteName = "Banua Publisher",
+    logoUrl = "",
+}: {
+    siteName?: string;
+    logoUrl?: string;
+}) {
     const pathname = usePathname();
     const [menuOpen, setMenuOpen] = useState(false);
 
@@ -22,11 +28,20 @@ export function Header() {
             <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-3 group">
-                    <div className="w-8 h-8 bg-navy flex items-center justify-center">
-                        <span className="text-gold font-heading font-bold text-sm">B</span>
-                    </div>
+                    {logoUrl ? (
+                        <div className="relative w-8 h-8 rounded overflow-hidden flex-shrink-0">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={logoUrl} alt={`${siteName} Logo`} className="object-cover w-full h-full" />
+                        </div>
+                    ) : (
+                        <div className="w-8 h-8 bg-navy flex items-center justify-center flex-shrink-0">
+                            <span className="text-gold font-heading font-bold text-sm">
+                                {siteName.charAt(0).toUpperCase()}
+                            </span>
+                        </div>
+                    )}
                     <span className="font-heading text-lg font-bold text-navy tracking-tight">
-                        Banua Publisher
+                        {siteName}
                     </span>
                 </Link>
 

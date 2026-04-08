@@ -73,6 +73,41 @@ export function SettingsForm({
         setSaving(false);
     };
 
+    const handleImageUpload = async (key: string, file?: File) => {
+        if (!file) return;
+        setSaving(true);
+        setError("");
+
+        try {
+            let processedFile = file;
+            if (key === "favicon_url") {
+                const imageCompression = (await import("browser-image-compression")).default;
+                processedFile = await imageCompression(file, {
+                    maxSizeMB: 0.1, // 100kb
+                    maxWidthOrHeight: 256,
+                    useWebWorker: true,
+                });
+            }
+
+            const formData = new FormData();
+            formData.append("file", processedFile);
+
+            const { uploadSiteMedia } = await import("@/app/actions/settings");
+            const result = await uploadSiteMedia(formData);
+
+            if (result?.error) {
+                setError(result.error);
+            } else if (result?.url) {
+                setValues((prev) => ({ ...prev, [key]: result.url }));
+                setSaved(false);
+            }
+        } catch (err: any) {
+            setError("Gagal mengunggah gambar.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
     return (
         <form onSubmit={handleSubmit} className="max-w-2xl space-y-10">
             {settingGroups.map((group) => (
@@ -84,12 +119,34 @@ export function SettingsForm({
                                 <label className="block text-sm font-semibold mb-1">
                                     {field.label}
                                 </label>
-                                <input
-                                    type="text"
-                                    value={values[field.key] || ""}
-                                    onChange={(e) => handleChange(field.key, e.target.value)}
-                                    className="input"
-                                />
+                                {field.key === "logo_url" || field.key === "favicon_url" ? (
+                                    <div className="space-y-3">
+                                        {values[field.key] && (
+                                            <div className="relative w-16 h-16 border border-border-light rounded bg-white overflow-hidden p-1 shadow-sm">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img src={values[field.key]} alt={field.label} className="object-contain w-full h-full" />
+                                            </div>
+                                        )}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => handleImageUpload(field.key, e.target.files?.[0])}
+                                            className="block w-full text-sm text-text-muted
+                                                file:mr-4 file:py-2 file:px-4
+                                                file:rounded file:border-0
+                                                file:text-sm file:font-semibold
+                                                file:bg-gold file:text-navy
+                                                hover:file:bg-gold-light cursor-pointer transition-colors"
+                                        />
+                                    </div>
+                                ) : (
+                                    <input
+                                        type="text"
+                                        value={values[field.key] || ""}
+                                        onChange={(e) => handleChange(field.key, e.target.value)}
+                                        className="input"
+                                    />
+                                )}
                             </div>
                         ))}
                     </div>

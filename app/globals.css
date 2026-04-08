@@ -42,18 +42,20 @@
 
 /* ── Base Styles ── */
 
-body {
-  background: var(--warm-white);
-  color: var(--text-primary);
-  font-family: var(--font-source-serif), Georgia, serif;
-  -webkit-font-smoothing: antialiased;
-}
+@layer base {
+  body {
+    background: var(--warm-white);
+    color: var(--text-primary);
+    font-family: var(--font-source-serif), Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+  }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-playfair), 'Playfair Display', serif;
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--navy);
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-playfair), 'Playfair Display', serif;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--navy);
+  }
 }
 
 /* ── Gold Divider ── */

@@ -21,9 +21,11 @@ const masterAdminItems = [
 export function AdminSidebar({
     role,
     email,
+    logoUrl,
 }: {
     role: string;
     email: string;
+    logoUrl?: string;
 }) {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -75,9 +77,16 @@ export function AdminSidebar({
                         className="flex items-center gap-3"
                         onClick={() => setMobileOpen(false)}
                     >
-                        <div className="w-7 h-7 bg-gold flex items-center justify-center">
-                            <span className="text-navy text-xs font-bold">B</span>
-                        </div>
+                        {logoUrl ? (
+                            <div className="relative w-8 h-8 rounded overflow-hidden flex-shrink-0 bg-white p-0.5">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={logoUrl} alt="Admin Logo" className="object-contain w-full h-full" />
+                            </div>
+                        ) : (
+                            <div className="w-7 h-7 bg-gold flex items-center justify-center">
+                                <span className="text-navy text-xs font-bold">B</span>
+                            </div>
+                        )}
                         <span className="font-heading text-sm font-bold text-white">
                             Admin Panel
                         </span>

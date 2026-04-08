@@ -28,9 +28,16 @@ export default async function AdminLayout({
         redirect("/admin/login");
     }
 
+    // Get dynamic logo
+    const { data: logoSetting } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "logo_url")
+        .single();
+
     return (
         <div className="flex min-h-screen bg-cream">
-            <AdminSidebar role={profile.role} email={profile.email} />
+            <AdminSidebar role={profile.role} email={profile.email} logoUrl={logoSetting?.value || ""} />
             <div className="flex-1 ml-0 md:ml-64">
                 <div className="p-6 md:p-8">{children}</div>
             </div>

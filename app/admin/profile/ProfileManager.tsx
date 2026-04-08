@@ -6,6 +6,7 @@ import { updatePassword, generate2FASecret, enable2FA, disable2FA } from "@/app/
 export function ProfileManager({ has2FA }: { has2FA: boolean }) {
     const [password, setPassword] = useState("");
     const [passwordConfirm, setPasswordConfirm] = useState("");
+    const [passwordTotp, setPasswordTotp] = useState("");
     const [passwordLoading, setPasswordLoading] = useState(false);
     const [passwordSuccess, setPasswordSuccess] = useState("");
     const [passwordError, setPasswordError] = useState("");
@@ -28,6 +29,9 @@ export function ProfileManager({ has2FA }: { has2FA: boolean }) {
         setPasswordLoading(true);
         const formData = new FormData();
         formData.set("password", password);
+        if (has2FA) {
+            formData.set("token", passwordTotp);
+        }
 
         const result = await updatePassword(formData);
 
@@ -37,6 +41,7 @@ export function ProfileManager({ has2FA }: { has2FA: boolean }) {
             setPasswordSuccess("Password berhasil diubah.");
             setPassword("");
             setPasswordConfirm("");
+            setPasswordTotp("");
         }
         setPasswordLoading(false);
     };
@@ -76,9 +81,10 @@ export function ProfileManager({ has2FA }: { has2FA: boolean }) {
     };
 
     const handleDisable2FA = async () => {
-        if (!confirm("Bila Anda menonaktifkan 2FA, keamanan akun Anda dapat berkurang. Yakin?")) return;
+        const token = prompt("Masukkan kode 2FA untuk menonaktifkan:");
+        if (!token) return;
         setTwoFALoading(true);
-        const result = await disable2FA();
+        const result = await disable2FA(token);
         if (result.error) setTwoFAError(result.error);
         setTwoFALoading(false);
     };
@@ -113,6 +119,22 @@ export function ProfileManager({ has2FA }: { has2FA: boolean }) {
                         />
                     </div>
 
+                    {has2FA && (
+                        <div>
+                            <label className="block text-sm font-semibold mb-1">Kode 2FA</label>
+                            <input
+                                type="text"
+                                value={passwordTotp}
+                                onChange={(e) => setPasswordTotp(e.target.value)}
+                                maxLength={6}
+                                pattern="[0-9]{6}"
+                                required
+                                className="input tracking-widest text-lg text-center"
+                                placeholder="000000"
+                            />
+                        </div>
+                    )}
+
                     {passwordError && <p className="text-error text-sm">{passwordError}</p>}
                     {passwordSuccess && <p className="text-success text-sm font-semibold">{passwordSuccess}</p>}
 
@@ -126,6 +148,8 @@ export function ProfileManager({ has2FA }: { has2FA: boolean }) {
             <div className="bg-white border border-border-light p-6">
                 <h2 className="text-xl mb-2">Autentikasi 2 Langkah (2FA)</h2>
                 <p className="text-sm text-text-muted mb-6">Tambahkan lapisan keamanan saat Login dengan aplikasi seperti Google Authenticator.</p>
+
+                {twoFAError && <p className="text-error text-sm mb-4">{twoFAError}</p>}
 
                 {has2FA ? (
                     <div>

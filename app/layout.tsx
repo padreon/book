@@ -20,32 +20,55 @@ const sourceSerif = Source_Serif_4({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Banua Publisher",
-    template: "%s | Banua Publisher",
-  },
-  description:
-    "Penerbit buku Indonesia — menerbitkan karya-karya berkualitas untuk pembaca nusantara.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createClient();
+  const { data: settingsData } = await supabase
+    .from("site_settings")
+    .select("key, value")
+    .in("key", ["publisher_name", "meta_description", "favicon_url"]);
+
+  const settingsMap: Record<string, string> = {};
+  settingsData?.forEach((s) => {
+    settingsMap[s.key] = s.value;
+  });
+
+  const title = settingsMap["publisher_name"] || "Banua Publisher";
+
+  return {
+    title: {
+      default: title,
+      template: `%s | ${title}`,
+    },
+    description:
+      settingsMap["meta_description"] ||
+      "Penerbit buku Indonesia — menerbitkan karya-karya berkualitas untuk pembaca nusantara.",
+    icons: settingsMap["favicon_url"] ? { icon: settingsMap["favicon_url"] } : undefined,
+  };
+}
 
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let gaId = "";
+  let settingsMap: Record<string, string> = {};
   try {
     const supabase = await createClient();
     const { data } = await supabase
       .from("site_settings")
-      .select("value")
-      .eq("key", "google_analytics_id")
-      .single();
-    gaId = data?.value || "";
+      .select("key, value");
+    if (data) {
+        data.forEach((s) => {
+            settingsMap[s.key] = s.value;
+        });
+    }
   } catch {
     // Supabase not configured yet
   }
+
+  const gaId = settingsMap["google_analytics_id"] || "";
+  const siteName = settingsMap["publisher_name"] || "Banua Publisher";
+  const logoUrl = settingsMap["logo_url"] || "";
 
   return (
     <html
@@ -54,9 +77,9 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <GoogleAnalytics gaId={gaId} />
-        <Header />
+        <Header siteName={siteName} logoUrl={logoUrl} />
         <main className="flex-1">{children}</main>
-        <Footer />
+        <Footer settings={settingsMap} />
       </body>
     </html>
   );

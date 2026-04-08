@@ -11,6 +11,34 @@ export async function updatePassword(formData: FormData) {
         return { error: "Password minimal 6 karakter." };
     }
 
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Tidak terautentikasi." };
+
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("totp_secret")
+        .eq("id", user.id)
+        .single();
+
+    if (profile?.totp_secret) {
+        const token = formData.get("token") as string;
+        if (!token) {
+            return { error: "Kode 2FA diperlukan." };
+        }
+
+        const { TOTP } = await import("otpauth");
+        const totp = new TOTP({
+            secret: profile.totp_secret,
+            algorithm: "SHA1",
+            digits: 6,
+            period: 30
+        });
+
+        if (totp.validate({ token, window: 1 }) === null) {
+            return { error: "Kode 2FA tidak valid." };
+        }
+    }
+
     const { error } = await supabase.auth.updateUser({
         password: password
     });
@@ -83,10 +111,31 @@ export async function enable2FA(formData: FormData) {
     return { success: true };
 }
 
-export async function disable2FA() {
+export async function disable2FA(token: string) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: "Tidak terautentikasi" };
+
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("totp_secret")
+        .eq("id", user.id)
+        .single();
+        
+    if (profile?.totp_secret) {
+        if (!token) return { error: "Kode 2FA diperlukan." };
+        const { TOTP } = await import("otpauth");
+        const totp = new TOTP({
+            secret: profile.totp_secret,
+            algorithm: "SHA1",
+            digits: 6,
+            period: 30
+        });
+
+        if (totp.validate({ token, window: 1 }) === null) {
+            return { error: "Kode 2FA tidak valid." };
+        }
+    }
 
     const { error } = await supabase.from("profiles").update({ totp_secret: null }).eq("id", user.id);
 
